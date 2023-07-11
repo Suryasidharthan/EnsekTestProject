@@ -73,13 +73,25 @@ namespace EnsekTestProject.Features
             testRunner.CollectScenarioErrors();
         }
         
+        public virtual void FeatureBackground()
+        {
+#line 3
+#line hidden
+#line 4
+testRunner.Given("I have a valid login with access token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line hidden
+#line 5
+    testRunner.When("I reset the test data", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+        }
+        
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Reset test data, buy fuel of Type = Electric, and verify orders")]
+        [NUnit.Framework.DescriptionAttribute("Buy fuel of each type by resetting the test data and then verify orders.")]
         [NUnit.Framework.CategoryAttribute("mytag")]
-        [NUnit.Framework.TestCaseAttribute("gas", "1", "1", null)]
-        [NUnit.Framework.TestCaseAttribute("nuclear", "2", "2", null)]
+        [NUnit.Framework.TestCaseAttribute("electric", "1", "3", null)]
+        [NUnit.Framework.TestCaseAttribute("gas", "5", "1", null)]
         [NUnit.Framework.TestCaseAttribute("oil", "1", "4", null)]
-        public virtual void ResetTestDataBuyFuelOfTypeElectricAndVerifyOrders(string fuelType, string quantity, string fuelId, string[] exampleTags)
+        public virtual void BuyFuelOfEachTypeByResettingTheTestDataAndThenVerifyOrders_(string fuelType, string quantity, string fuelId, string[] exampleTags)
         {
             string[] @__tags = new string[] {
                     "mytag"};
@@ -92,8 +104,8 @@ namespace EnsekTestProject.Features
             argumentsOfScenario.Add("fuelType", fuelType);
             argumentsOfScenario.Add("quantity", quantity);
             argumentsOfScenario.Add("fuelId", fuelId);
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Reset test data, buy fuel of Type = Electric, and verify orders", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 4
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Buy fuel of each type by resetting the test data and then verify orders.", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 8
  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -113,15 +125,15 @@ namespace EnsekTestProject.Features
             else
             {
                 this.ScenarioStart();
-#line 5
-    testRunner.Given("I have a valid access token", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+#line 3
+this.FeatureBackground();
 #line hidden
-#line 7
-    testRunner.When(string.Format("I buy a {0} of fuelType having energy_id as {1}", quantity, fuelId), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line 9
+    testRunner.When(string.Format("I buy some {0} of fuelType having energy_id as {1}", quantity, fuelId), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 8
+#line 10
     testRunner.Then(string.Format("I verify that the above order is returned in the orders list with the expected {0" +
-                            "} and {1} and Datetime details", quantity, fuelType), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+                            "} and {1} and the current Datetime details", fuelType, quantity), ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();

@@ -9,6 +9,9 @@ using TechTalk.SpecFlow;
 using System.Text.RegularExpressions;
 using EnsekTestProject.EndPoints;
 using EnsekTestProject.Models;
+using Microsoft.Extensions.Configuration;
+using EnsekTestProject.Helpers;
+
 
 namespace EnsekTestProject.StepDefinitions
 {
@@ -18,72 +21,100 @@ namespace EnsekTestProject.StepDefinitions
 
         private RestClient client;
         private RestRequest request;
-        private RestResponse response;
-        private string accessToken;
-        private List<string> fuelTypes = new List<string> { "3" };
-        private EnsekBuyFuel buyFuel;
-        private EnsekOrders viewOrders;
-        private string baseUrl = "https://qacandidatetest.ensek.io/";
+        private string _baseUrl;
+        private string _accessToken;
+        private BuyFuel buyFuel;
+        private Orders viewOrders;       
+        private Login login;
+        private Reset reset;
+        
 
-       public EnsekBuyFuelSteps() { viewOrders = new EnsekOrders(baseUrl); buyFuel = new EnsekBuyFuel(baseUrl); }
-       
-
-        [Given(@"I have a valid access token")]
-        public void GivenIHaveAValidAccessToken()
+       public EnsekBuyFuelSteps()
         {
-            accessToken = "eyJ0eXAiOiJ";
-           
+            try
+            {
+                var config = ConfigHelper.GetConfiguration();
+                _baseUrl = config["BaseUrl"];
+                login = new Login(_baseUrl, config["username"], config["password"]);               //Login with the username password and baseUrl mentioned in config file
+            }
+
+            catch (Exception ex)
+            {
+                                                    
+                Console.WriteLine($"Exception occurred while retrieving configuration: {ex}");        // Log or handle the exception appropriately
+            }
+
         }
+       
+        [Given(@"I have a valid login with access token")]
+        public void GivenIHaveAValidLoginWithAccessToken()
+        {
+            _accessToken = login.GetAccessToken();
+        }
+
 
         [When(@"I reset the test data")]
         public void WhenIResetTheTestData()
         {
-            client = new RestClient(baseUrl);
-            request = new RestRequest("/ENSEK/reset", Method.Post);
-            request.AddHeader("Authorization", "Bearer " + accessToken);
-
-            response = client.Execute(request);
+            reset = new Reset(_baseUrl);
+            bool isResetSuccessful = reset.ResetTestData(_accessToken);
+            isResetSuccessful.Should().BeTrue("Reset not successful");
         }
 
-        [When(@"I buy a (.*) of fuelType having energy_id as (.*)")]
-        public void WhenIBuyAOfFuelTypeHavingEnergy_IdAs(int quantity, int fuelId)
+        [When(@"I buy some (.*) of fuelType having energy_id as (.*)")]
+        public void WhenIBuySomeOfFuelTypeHavingEnergy_IdAs(int quantity, int fuelId)
         {
+            buyFuel = new BuyFuel(_baseUrl);
             string actualOrderId;
-            
-             actualOrderId = buyFuel.BuyFuel(fuelId, quantity, accessToken);
-            ScenarioContext.Current.Set(actualOrderId, "orderIdKey");
+            actualOrderId = buyFuel.BuyFuelWithFuelIdAndQuantity(fuelId, quantity, _accessToken); //Buy fuel for the given FuelType and as per the quantity specified.
+            ScenarioContext.Current.Set(actualOrderId, "orderIdKey");           //Save the orderId of the above order in the ScenarioContext to be used in the Then statement below.
         }
 
-        [Then(@"I verify that the above order is returned in the orders list with the expected (.*) and (.*) and Datetime details")]
-        public void ThenIVerifyThatTheAboveOrderIsReturnedInTheOrdersListWithTheExpectedAndElectricDetails(int quantity, string fuelType)
+        [Then(@"I verify that the above order is returned in the orders list with the expected (.*) and electric and current Datetime details")]
+        public void ThenIVerifyThatTheAboveOrderIsReturnedInTheOrdersListWithTheExpectedAndElectricAndCurrentDatetimeDetails(int p0)
+        {
+            throw new PendingStepException();
+        }
+
+        [Then(@"I verify that the above order is returned in the orders list with the expected (.*) and (.*) and the current Datetime details")]
+        public void ThenIVerifyThatTheAboveOrderIsReturnedInTheOrdersListWithTheExpectedFuelTypeAndQuantityAndCurrentDatetimeDetails(string fuelType, int quantity)
         {
             {
-                List<Order> listOfOrders = viewOrders.GetListOfOrders(accessToken);
+                viewOrders = new Orders(_baseUrl);
+                List<Order> listOfOrders = viewOrders.GetListOfOrders(_accessToken);
 
                 string actualOrderId = ScenarioContext.Current.Get<string>("orderIdKey");       //Get the orderId for the order  placed in the above step.
                 foreach (var orderId in listOfOrders)
                 {
                     Order order = listOfOrders.FirstOrDefault(o => o.id.Equals(actualOrderId)); //From the list of orders search for the order that was placed in the above step.
-                    order.Should().NotBeNull($"Order with orderId {actualOrderId} is missing");
+                    order.Should().NotBeNull($"Order with orderId {actualOrderId} is missing"); //Verify that order is present in the list.
+
+                    //Verify that the order is placed for the correct Fuel type.
                     string actualFuel = order.fuel;
                     actualFuel.Should().Be(fuelType, $"The fuelType in the order {actualOrderId} is incorrect");
+
+                    //Verify that the quantity of order placed is as mentioned in the request.
                     int actualQuantity = order.quantity;
                     actualQuantity.Should().Be(quantity, $"The quantity in the order {actualOrderId} is incorrect");
 
+                    //Verify that the difference between the orderTime and currentTime is less than 30 seconds(this threshold can vary)
                     DateTime currentTime = DateTime.Now;
-
                     DateTime actualOrderTime = DateTime.Parse(order.time);
-
                     TimeSpan timeDifference = currentTime - actualOrderTime;
-
                     bool isTimeCorrect = timeDifference.TotalSeconds <= 30;
-
                     isTimeCorrect.Should().BeTrue($"Time on the order {actualOrderId} is incorrect");
                 }
 
             }
 
         }
+
+        [Then(@"I verify that the above order is not placed and it is not returned in the orders list\.")]
+        public void ThenIVerifyThatTheAboveOrderIsNotPlacedAndItIsNotReturnedInTheOrdersList_()
+        {
+            throw new PendingStepException();
+        }
+
 
 
     }
