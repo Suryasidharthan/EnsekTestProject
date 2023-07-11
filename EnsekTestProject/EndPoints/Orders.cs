@@ -9,14 +9,14 @@ using Newtonsoft.Json;
 
 namespace EnsekTestProject.EndPoints
 {
-    public class EnsekOrders
+    internal class Orders
     {
         private RestClient client;
         private RestRequest request;
         private RestResponse response;
         
 
-        public EnsekOrders(string baseUrl)
+        public Orders(string baseUrl)
         {
             client = new RestClient(baseUrl);
 
