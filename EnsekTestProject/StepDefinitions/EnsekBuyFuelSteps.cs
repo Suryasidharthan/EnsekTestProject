@@ -19,14 +19,14 @@ namespace EnsekTestProject.StepDefinitions
     public class EnsekBuyFuelSteps
     {
 
-        private RestClient client;
-        private RestRequest request;
+        private RestClient _client;
+        private RestRequest _request;
         private string _baseUrl;
         private string _accessToken;
-        private BuyFuel buyFuel;
-        private Orders viewOrders;       
-        private Login login;
-        private Reset reset;
+        private BuyFuel _buyFuel;
+        private Orders _viewOrders;       
+        private Login _login;
+        private Reset _reset;
         
 
        public EnsekBuyFuelSteps()
@@ -35,7 +35,7 @@ namespace EnsekTestProject.StepDefinitions
             {
                 var config = ConfigHelper.GetConfiguration();
                 _baseUrl = config["BaseUrl"];
-                login = new Login(_baseUrl, config["username"], config["password"]);               //Login with the username password and baseUrl mentioned in config file
+                _login = new Login(_baseUrl, config["username"], config["password"]);               //Login with the username password and baseUrl mentioned in config file
             }
 
             catch (Exception ex)
@@ -49,24 +49,24 @@ namespace EnsekTestProject.StepDefinitions
         [Given(@"I have a valid login with access token")]
         public void GivenIHaveAValidLoginWithAccessToken()
         {
-            _accessToken = login.GetAccessToken();
+            _accessToken = _login.GetAccessToken();
         }
 
 
         [When(@"I reset the test data")]
         public void WhenIResetTheTestData()
         {
-            reset = new Reset(_baseUrl);
-            bool isResetSuccessful = reset.ResetTestData(_accessToken);
+            _reset = new Reset(_baseUrl);
+            bool isResetSuccessful = _reset.ResetTestData(_accessToken);
             isResetSuccessful.Should().BeTrue("Reset not successful");
         }
 
         [When(@"I buy some (.*) of fuelType having energy_id as (.*)")]
         public void WhenIBuySomeOfFuelTypeHavingEnergy_IdAs(int quantity, int fuelId)
         {
-            buyFuel = new BuyFuel(_baseUrl);
+            _buyFuel = new BuyFuel(_baseUrl);
             string actualOrderId;
-            actualOrderId = buyFuel.BuyFuelWithFuelIdAndQuantity(fuelId, quantity, _accessToken); //Buy fuel for the given FuelType and as per the quantity specified.
+            actualOrderId = _buyFuel.BuyFuelWithFuelIdAndQuantity(fuelId, quantity, _accessToken); //Buy fuel for the given FuelType and as per the quantity specified.
             ScenarioContext.Current.Set(actualOrderId, "orderIdKey");           //Save the orderId of the above order in the ScenarioContext to be used in the Then statement below.
         }
 
@@ -80,8 +80,8 @@ namespace EnsekTestProject.StepDefinitions
         public void ThenIVerifyThatTheAboveOrderIsReturnedInTheOrdersListWithTheExpectedFuelTypeAndQuantityAndCurrentDatetimeDetails(string fuelType, int quantity)
         {
             {
-                viewOrders = new Orders(_baseUrl);
-                List<Order> listOfOrders = viewOrders.GetListOfOrders(_accessToken);
+                _viewOrders = new Orders(_baseUrl);
+                List<Order> listOfOrders = _viewOrders.GetListOfOrders(_accessToken);
 
                 string actualOrderId = ScenarioContext.Current.Get<string>("orderIdKey");       //Get the orderId for the order  placed in the above step.
                 foreach (var orderId in listOfOrders)

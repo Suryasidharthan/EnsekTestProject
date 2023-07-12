@@ -1,9 +1,4 @@
 ﻿using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EnsekTestProject.Models;
 using Newtonsoft.Json;
 
@@ -11,21 +6,19 @@ namespace EnsekTestProject.EndPoints
 {
     internal class Orders
     {
-        private RestClient client;
-        private RestRequest request;
-        private RestResponse response;
+        private RestClient _client;
+        private RestRequest _request;
         
-
         public Orders(string baseUrl)
         {
-            client = new RestClient(baseUrl);
+            _client = new RestClient(baseUrl);
 
         }
         public List<Order> GetListOfOrders(string accessToken)
         {
-            request = new RestRequest($"/ENSEK/orders", Method.Get);
-            request.AddHeader("Authorization", "Bearer " + accessToken);
-            var response = client.Execute(request).Content;
+            _request = new RestRequest($"/ENSEK/orders", Method.Get);
+            _request.AddHeader("Authorization", "Bearer " + accessToken);
+            var response = _client.Execute(_request).Content;
             List<Order> orders = JsonConvert.DeserializeObject<List<Order>>(response);
             return orders;
         }

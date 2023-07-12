@@ -1,46 +1,40 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 
 
 namespace EnsekTestProject.EndPoints
 {
     internal class Login
     {
-        private string username;
-        private string password;
-        private string accessToken;
-        private string baseUrl;
-        private RestClient client;
-        private RestRequest request;
-        private RestResponse response;
+        private string _username;
+        private string _password;
+        private string _accessToken;
+        private string _baseUrl;
+        private RestClient _client;
+        private RestRequest _request;
+        private RestResponse _response;
 
         public Login(string baseUrl,string username, string password)
         { 
-           this.username = username;
-           this.password = password;
-           this.baseUrl = baseUrl;
+           this._username = username;
+           this._password = password;
+           this._baseUrl = baseUrl;
         }
 
         private void LoginToGetAccessToken()
         {
-            client = new RestClient(baseUrl);
-            request = new RestRequest("ENSEK/login", Method.Post);
-            var loginBody = new {username = this.username, password = this.password};
-            request.AddBody(loginBody);
-            response = client.Execute(request);
-            if (response.StatusCode!= System.Net.HttpStatusCode.OK)
+            _client = new RestClient(_baseUrl);
+            _request = new RestRequest("ENSEK/login", Method.Post);
+            var loginBody = new {username = this._username, password = this._password };
+            _request.AddBody(loginBody);
+            _response = _client.Execute(_request);
+            if (_response.StatusCode!= System.Net.HttpStatusCode.OK)
             { 
-                throw new Exception($"Login not successful.{response.ErrorMessage}"); 
+                throw new Exception($"Login not successful.{_response.ErrorMessage}"); 
             }
             else 
-            { 
-                accessToken = grabAccessToken(response);
+            {
+                _accessToken = grabAccessToken(_response);
             }
                 
         }
@@ -52,12 +46,12 @@ namespace EnsekTestProject.EndPoints
         }
         public string GetAccessToken()
         {
-            if (accessToken == null)
+            if (_accessToken == null)
             {
                 LoginToGetAccessToken();
 
             }
-            return accessToken;
+            return _accessToken;
         }
     }
 }

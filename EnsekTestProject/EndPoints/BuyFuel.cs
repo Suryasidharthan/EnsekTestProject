@@ -8,26 +8,26 @@ namespace EnsekTestProject.EndPoints
 {
     internal class BuyFuel
     {
-        private RestClient client;
-        private RestRequest request;
-        private RestResponse response;
+        private RestClient _client;
+        private RestRequest _request;
+        private RestResponse _response;
         public BuyFuel(string baseUrl)
         {
-            client = new RestClient(baseUrl);
+            _client = new RestClient(baseUrl);
           
         }
         public string BuyFuelWithFuelIdAndQuantity(int fuelId, int quantity, string accessToken)
         {
             string orderId;
-            request = new RestRequest($"/ENSEK/buy/{fuelId}/{quantity}", Method.Put);
-            request.AddHeader("Authorization", "Bearer " + accessToken);
-            response = client.Execute(request);
+            _request = new RestRequest($"/ENSEK/buy/{fuelId}/{quantity}", Method.Put);
+            _request.AddHeader("Authorization", "Bearer " + accessToken);
+            _response = _client.Execute(_request);
 
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            if (_response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new Exception("Failed to buy fuel: " + response.ErrorMessage);
+                throw new Exception("Failed to buy fuel: " + _response.ErrorMessage);
             }
-            JObject orderResult = JObject.Parse(response.Content);
+            JObject orderResult = JObject.Parse(_response.Content);
             string message = orderResult["message"].ToString();  // Get the message displayed in body for this request
             string pattern = @"\b[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}\b"; //Regular expression to fetch the order UUID from the message.
             Match match = Regex.Match(message, pattern);

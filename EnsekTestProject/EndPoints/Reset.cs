@@ -10,20 +10,20 @@ namespace EnsekTestProject.EndPoints
 {
     internal class Reset
     {
-        private RestClient client;
-        private RestRequest request;
-        private RestResponse response;
+        private RestClient _client;
+        private RestRequest _request;
+        private RestResponse _response;
         public Reset(string baseUrl)
         {
-            client = new RestClient(baseUrl);
+            _client = new RestClient(baseUrl);
         }
 
         public bool ResetTestData(string accessToken)
         {
-            request = new RestRequest($"/ENSEK/reset", Method.Post);
-            request.AddHeader("Authorization", "Bearer " + accessToken);
-            response = client.Execute(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            _request = new RestRequest($"/ENSEK/reset", Method.Post);
+            _request.AddHeader("Authorization", "Bearer " + accessToken);
+            _response = _client.Execute(_request);
+            if (_response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 return false;
             }
